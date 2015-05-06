@@ -33,25 +33,63 @@ class Wall(DObject):
         oldYREP = self.getSlope(l-dx)
         oPt = self.rect.top+oldYREP
         Pt = self.rect.top+YREP
-        print Pt-o.collisionrect.centery
+        #print Pt-o.collisionrect.centery
         b = ""
+        if o.groundobj and not o.jump:
+            #print "grounded"
+            t1 = o.groundobj.rect.left - self.rect.right
+            t2 = o.groundobj.rect.right - self.rect.left
+            if t1 == 0:
+                #print "right"
+                #ground object within our range of influence, collision on this objects right
+                if abs((self._ET*self.rect.height+self.rect.top) - (o.groundobj._ST*o.groundobj.rect.height+o.groundobj.rect.top)) <=1:
+                    #print "deferred from rightside collision ============"
+                    if (o.collisionrect.centery >= self.rect.bottom) or (o.prevpos[1] >= self.rect.bottom):
+                        o.collisionrect.top = self.rect.bottom
+                        
+                    elif (o.collisionrect.centerx >= self.rect.left) and (o.collisionrect.centerx <= self.rect.right):
+                        o.touchground(self)
+                        o.collisionrect.bottom = Pt
+                        o.ddy = 0
+                        o.contact = True
+                    else:
+                        o.touchground(o.groundobj)
+                    return
+            if t2 == 0:
+                #print "left"
+                #ground object within our range of influence, collision on this objects right
+                if abs((self._ST*self.rect.height+self.rect.top) - (o.groundobj._ET*o.groundobj.rect.height+o.groundobj.rect.top)) <=1:
+                    #print "deferred from leftside collision ~~~~~~~~~~~~"
+                    if (o.collisionrect.centery >= self.rect.bottom) or (o.prevpos[1] >= self.rect.bottom):
+                        o.collisionrect.top = self.rect.bottom
+                    elif (o.collisionrect.centerx >= self.rect.left) and (o.collisionrect.centerx <= self.rect.right ):
+                        o.touchground(self)
+                        o.collisionrect.bottom = Pt
+                        o.ddy = 0
+                        o.contact = True
+                    else:
+                        o.touchground(o.groundobj)
+                    return
+                    
         if o.collisionrect.centery >= Pt: # o.prevpos[1]>=oPt:
             #DEAL WITH ALL CASES IN WHICH WE HAVE NO CHANCE OF GETTING ON
+            #IF another object is this object's grounded block, we can defer to that
             b += "CANT GET ON:::"
-            print "BULL"
+            #print "BULL"
+            
             if dx != 0 or (dy == 0 and dx == 0):
                 b+="dx check:::"
                 #moving into the block from the sides
                 if (o.collisionrect.centerx >= self.rect.left) and (o.prevpos[0] <= self.rect.left):
                     #collision from the left side
                     o.collisionrect.right = self.rect.left
-                    o.ddx = -1
+                    o.ddx = 0
                     o.dx = 0
                     b+="Halted along my left:::"
                 elif (o.collisionrect.centerx <= self.rect.right) and (o.prevpos[0] >= self.rect.right):
                     #collision from the right side
                     o.collisionrect.left = self.rect.right
-                    o.ddx = 1
+                    o.ddx = 0
                     o.dx=0
                     b+="Halted along my right:::"
                 elif o.prevpos[0] <= self.rect.left:
@@ -59,13 +97,14 @@ class Wall(DObject):
                 elif o.prevpos[0] >= self.rect.right:
                     o.collisionrect.left = self.rect.right
                 else:
-                    print "SHIIIIIIIIIIIIIIIIIIITTTT"
+                    #print "SHIIIIIIIIIIIIIIIIIIITTTT"
+                    pass
                 #elif o.collisionrect.centerx <= self.rect.centerx and o.prevpos[0] <= self.rect.centerx: 
-                #    print "strange~~~~~~~~~~~~~~~~~~~~~~~~~ddddddddddddddd"
+                #    #print "strange~~~~~~~~~~~~~~~~~~~~~~~~~ddddddddddddddd"
             elif (o.collisionrect.centerx >= self.rect.left)and(o.collisionrect.centerx <= self.rect.right):
                 #center is inside this block, and below it. 
                 #set collision rect.top if prevpos was also below
-                if o.prevpos[1] > oPt:
+                if o.prevpos[1] > self.rect.bottom:
                     o.collisionrect.top = self.rect.bottom
                     b+= "Halted along my bottom"
                 else:
@@ -76,15 +115,17 @@ class Wall(DObject):
                     b+= "Halted along my top/slope"
                 
             else:
-                print "unhandled error with o.centery under block's slope"
-                print "dx: "+str(dx)+" - dy: " +str(dy)
-            print b   
+                #print "unhandled error with o.centery under block's slope"
+                #print "dx: "+str(dx)+" - dy: " +str(dy)
+                pass
+            #print b   
+            pass
         else:
             #centery is at or above the slope
             b+="wtf guess we are on"
             if (o.collisionrect.centerx < self.rect.left)or(o.collisionrect.centerx > self.rect.right):
                 #the center isn't inside, don't affect it.
-                print "4~~"
+                #print "4~~"
                 return
             elif dy == 0:
                 b+="5~~"
@@ -93,14 +134,14 @@ class Wall(DObject):
                 if o.collisionrect.bottom >= Pt-4 or o.collisionrect.bottom >= oPt-4:
                     o.collisionrect.bottom = Pt
                     o.contact = True
-                    print b+"6~~"
+                    #print b+"6~~"
                 return
             elif o.collisionrect.bottom < Pt:
-                print b+"7~~"
+                #print b+"7~~"
                 #dy != 0, dx ==0, so there is no true collision here.
                 return
             else:
-                print b+"8~~"
+                #print b+"8~~"
                 o.touchground(self)
                 if dy > 0:
                     o.ddy = 0

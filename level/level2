@@ -1,16 +1,18 @@
-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-C                                                     C
-C  XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXC 
-CX                                                   CC
-C                       LXXXXXXXXX                    CX
-C X                    LCCC                            C
-C C                   LCCCC      XX                    C
-C CX                 LCCCCC                 X          C
-C     XXX           LCCCCCC             TB     B       C
-C           XXX    LCCCCCCC           X CX             C
-C              X                         X             C
-C                      TB                XX BX         C
-C      TBXXXXXX      TBCC             TBXX             C
-CXXXXXXXX          TBCCCCXX   P      L   C             C
-C                TBCC              TB                  C
-CXXXXXXXXXXXXXXXXCCCCXXXXXXXXXXXXXXCCCXXXXXXXXXXXXXXXXXC
+
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX)
+-_____||___________|_________|______|_____________|___)
+-__(XXXXXXXXXXXXXXXXXXXX)____|(XXXXXXXXXXXXXXXXXXXXXXX) 
+()_|___|___|_______|______|_|_____|_|_|____|____|___|_()
+-                       LXXXXXXXX)                    ()
+- -                    LCC)                            -
+- -                   LCCC)      ()                    -
+- -)                 LCCCC)                 -          -
+-     (X)  (l       LCCCCC)             TB     B       -
+-            -l    LCCCCCC)           - ()             -
+-              l                         -             -
+-        P       -     TB                () B)         -
+-      TBXXXXX)      TBC)             TBXX             -
+(XXXXX)            TBCCCCX)          L   C             -
+-                TBC)              TB                  -
+(XXxxXxxxxxXxXXxxCCCCXxXXxxXxXXXXxxxxXXXxxXXXxXXXXxxxXX)

@@ -1,11 +1,11 @@
-import pygame, Constants, DObject, sys, Spark, math
+import pygame, Constants, DObject, Wall, sys, Spark, math
 from pygame.locals import *
 from Constants import *
 from DObject import *
 
 
 class Player(DObject):
-    def __init__(self,x,y,parsurf=[None],IMGFILE = None):
+    def __init__(self,x,y,parsurf=[None],img = None):
         DObject.__init__(self,x,y,parentsurface = parsurf)
         self.imglst = []
         #~~~~~~~ movement attributes
@@ -25,6 +25,7 @@ class Player(DObject):
         self.direction = 0
         self.crouching = False
         self.prevstate = None
+        self.JumpLeeWay = 0 #number of frames we were airborn
         #~~~~~~~ image/draw material + collision rect definition
         #imglst holds a dictionary of all the available sprites and animations
         #State represents animation state, not true states.
@@ -46,8 +47,8 @@ class Player(DObject):
         self.imglst.append(MIL2("player/JumpRise*.png",4)[1])
         self.imglst.append(MIL2("player/Fall*.png",4)[0])
         self.imglst.append(MIL2("player/Fall*.png",4)[1])
-        self.imglst.append(MIL2("player/Land*.png",3)[0])
-        self.imglst.append(MIL2("player/Land*.png",3)[1])
+        self.imglst.append(MIL2("player/Land*.png",1)[0])
+        self.imglst.append(MIL2("player/Land*.png",1)[1])
         self.imglst.append(MIL2("player/Hurt*.png",4)[0])
         self.imglst.append(MIL2("player/Hurt*.png",4)[1])
         self.imglst.append(MIL2("player/Attack1*.png",3)[0])
@@ -67,38 +68,72 @@ class Player(DObject):
         self.inputs = PS3.copy()
         self.PrevInputs = self.inputs.copy()
         self.PumpInput();self.PumpInput()#<set all to 0.0
-        self.groundobj = None
+        self.groundobj = Wall.Wall(x,y)
         
     def changeState(self,num):
         '''num must be divisible by 2'''
-        if self.state == num:
+        #print "changestate state: "+str(self.state+self.direction)+"  num: "+str(num)
+        if (self.state+self.direction)/2 == num/2:
             return False
         self.state = num
         self.frame = 0
-        
+    def HorizMotion(self, amnt, useinputs = False):
+        '''use this instead of setting it every instance'''
+        self.ddx += amnt
+        if self.grounded:
+            frict = self.ddx*P_FRICTION*self.groundobj.tract
+            if abs(self.ddx) < P_MAXRUNSPEED and useinputs:
+                self.ddx += self.inputs['LSX']*P_RUNACCEL*self.groundobj.tract
+                self.ddx -= frict
+            
+        else:
+            frict = self.ddx*P_AIRFRICTION
+            if abs(self.ddx) < P_MAXAIRSPEED and useinputs:
+                self.ddx += self.inputs['LSX']*P_AIRRUNACCEL
+                self.ddx -= frict
+                
     def AdjustState(self):
         '''would use self.inputs to determine state. changes states, setting previous state to the one the frame before'''
         cur_frame = 0
         self.frame += 1
         self.prevstate = self.state
         self.ddy += GRAV
+        if self.spark.CurrentAction == "Dash":
+            self.spark.CAcounter+=1
+            if self.spark.CAcounter > 10:
+                self.spark.CAcounter = 0
+                self.spark.CurrentAction = "None"
+            else:
+                self.ddx = cmp(self.inputs['LSX'],0)*P_MAXRUNSPEED*3
+        if self.JumpLeeWay >=4:
+            self.jump = True
         self.prevpos = [self.collisionrect.centerx,self.collisionrect.centery]
-        if self.grounded and not self.wasonground:
+        if self.grounded and not self.wasonground and self.JumpLeeWay > 4:
             #we weren't on the ground, but now we are. Land animation
             self.changeState(18)
-            self.wasonground = True
+            #print "land animation trigger"
+            #self.wasonground = True
+        if self.grounded:
+            self.JumpLeeWay = 0
         elif not self.grounded:
             #not grounded
             if self.wasonground:
                 self.collisionrect.bottom+= self.ddy
-            if self.ddy >= 0:
+            else:
+                self.JumpLeeWay += 1
+                
+            if self.ddy >= 0 and (self.JumpLeeWay > 4):
                 #falling off of something
                 self.changeState(16)
-        
+                #print "falling trigger"
+            
+        #Landing animation goes to idle when done, blocks movement
         if self.state/2==9:
             #print "landing animation" + str(self.frame)
-            if not self.frame/len(self.imglst[self.state+self.direction]):    
-                pass
+            if not (self.frame/len(self.imglst[self.state+self.direction]))>=1:    
+                #return is needed. but we need to handle motion.
+                self.HorizMotion(self.inputs['LSX'])
+                return
             else:
                 self.changeState(0)
         
@@ -115,21 +150,24 @@ class Player(DObject):
         #if O button is held, jump where possible JUMP INPUT        
         if self.inputs["O"]:
             self.crouching = False
-            if self.grounded:
+            if self.grounded or self.JumpLeeWay < 4:
                 if not self.jump:
-                    self.ddy = -30 #we add because it should be 0 beforehand
+                    self.ddy = P_SHORTHOP #we add because it should be 0 beforehand
                     x = self.inputs['LSX']
-                    self.ddx += x*5
+                    if cmp(x*self.ddx,0) < 0:
+                        #if opposite dirs, slow
+                        self.ddx += x*P_WALKSPEED
+                        
                 self.jump=True;self.grounded=False;self.changeState(12)
             elif self.ddy < 0 and not self.doublejump:
                 #currently burning first jump. increase effect of jump.
-                self.dy -= .8
+                self.dy += P_JUMPEXTENSION
         #otherwise if I'm crouching
         elif self.inputs['LSY'] > .75:
             if self.grounded:
                 cur_frame = self.frame
                 self.crouching = True
-                self.ddx = self.ddx-self.ddx*.2 #retain 80% x accel per frame
+                self.ddx -= self.ddx*P_FRICTION*2 #retain 80% x accel per frame
         else:
             self.crouching = False
              
@@ -139,24 +177,26 @@ class Player(DObject):
             #add some acceleration to the left each frame
             if self.grounded:
                 if abs(self.ddx) < P_MAXRUNSPEED:
-                    self.ddx += P_RUNACCEL*self.inputs['LSX']*self.groundobj.tract
+                    self.ddx += P_RUNACCEL*self.inputs['LSX']*self.groundobj.tract + self.ddx*P_FRICTION
                 elif cmp(self.ddx,0) != cmp(self.inputs['LSX'],0):
                     #different directions, we can reduce.
                     self.ddx += P_RUNACCEL*self.inputs['LSX']*self.groundobj.tract
+                    #print "Was past max speed on ground - moving back"
                 #variable acceleration based on stick position. 
                 #max is like 2 or something, but we know we're running. 
                 #set to run animation
                 self.changeState(8)
-            if not self.grounded:
+            elif not self.grounded:
                 #aerial control
                 if abs(self.ddx) < P_MAXAIRSPEED:
                     self.ddx += P_AIRRUNACCEL*self.inputs['LSX']
-                elif cmp(self.ddx,0) != cmp(self.inputs['LSX'],0):
-                    #ddx greater than max speed, inputs are opposite
-                    self.ddx += P_AIRRUNACCEL*self.inputs['LSX']
+                else:
+                    self.ddx -= self.ddx*P_AIRFRICTION
         elif self.inputs['LSX'] == 0:
             if self.grounded:
                 self.changeState(0)
+            else:
+                self.ddx -= self.ddx*P_AIRFRICTION
             if self.wasonground and not self.grounded:
                 pass #TODO, do we need to change states?
         if self.crouching and self.state not in [2,4]:
@@ -180,16 +220,16 @@ class Player(DObject):
                 num = self.state+2
             self.changeState(num)
         #this should solve frame adjustment + state change.
-        print "grounded: \t"+str(self.grounded)
-        print "wasgrounded: \t"+str(self.wasonground)
-        print "jump: \t\t"+str(self.jump)
+        #print "grounded: \t"+str(self.grounded)
+        #print "wasgrounded: \t"+str(self.wasonground)
+        #print "jump: \t\t"+str(self.jump)
         self.wasonground = self.grounded
         self.grounded = False
         #self.wasonground = False
         
     def touchground(self,touchedobj):
-        self.changeState(18)
         self.grounded = True
+        self.contact = True
         self.jump = self.doublejump = False
         self.groundobj = touchedobj
         
@@ -199,11 +239,15 @@ class Player(DObject):
         tx = self.rect.right-self.collisionrect.right
         ry = self.collisionrect.top-self.rect.top
         pygame.draw.line(self.image,(200,200,200),(rx,ry),(tx,ry),3)
+        #TODO TODO
+        LELx = self.groundobj.rect.x - self.rect.x
+        LELy = self.groundobj.rect.y - self.rect.y
         if relrect == None:
             #we weren't given a location to defer to
             surf.blit(self.image,self.rect)
         else:
             surf.blit(self.image,relrect)
+            pygame.draw.rect(surf,(200,200,100),(relrect.left+LELx,relrect.top+LELy,TLWDTH,TLHGHT),4)
         self.spark.Draw(surf,relrect)
         
         
@@ -282,9 +326,14 @@ class Player(DObject):
         for element in commands:
             if element in self.inputs:
                 self.inputs[element] = commands[element]
+                
         action = self.inputs['R1']-self.PrevInputs['R1']
         if self.inputs['R1']==0:
             action = 0
+        if self.inputs['L2']>self.PrevInputs['L2']:
+            self.spark.changeState(self.spark.state-1)
+        if self.inputs['R2']>self.PrevInputs['R2']:
+            self.spark.changeState(self.spark.state+1)
         self.spark.StoreValues(action,[self.inputs['LSX'],self.inputs['LSY']],[self.inputs['RSX'],self.inputs['RSY']])
         
         
@@ -313,7 +362,3 @@ class Player(DObject):
                 else:
                     obj.rect.bottom = self.rect.top
         
-n = Player(0,0)
-print len(n.imglst[-1])
-del n
-

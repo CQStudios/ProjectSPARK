@@ -1,10 +1,8 @@
 XXXXXXXXXXXXXX
-C  P         
-C            C
+C           
+C           Xl
 C         LlXC 
 CXbtTtTtTBC
-
-
                  bt      X
                   Xbt    X
                     Xbt  X
@@ -13,12 +11,12 @@ CXbtTtTtTBC
                    TBX  TBXXXXXXXXX
 X                 LX    XX     Tt
 X                LX     X  X XXXXXXX
-X               LX      XX X  X
-X              LXX      X  X  X
-Xl            LX XXX    X  XX X
-XXl          LXXl  X    X XX  X
-XXXbt      TBXXXXTt     X  X  X  XXXXXXXXXXXXXXXXXXXXXXXXXXXX
-XXXXXbt  TBXXXXXXXXbt   TBlTBlTBlTTTTTTTTTTTTTTTTTTTTTTTTTTT
+X__|____________LX      XX X  X
+X_____________|LXX      X  X  X
+Xl_________|__LX XXX    X  XX X
+XXl___|______LXXl  X    X XX  X  P
+XXXbt______TBXXXXTt     X  X  X  XXXXXXXXXXXXXXXXXXXXXXXXXXXX
+XXXXXbt__TBXXXXXXXXbt   TBlTBlTBlTTTTTTTTTTTTTTTTTTTTTTTTTTT
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 

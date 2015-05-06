@@ -245,83 +245,137 @@ class Level(object):
         self.level1 = [] 
         self.world = []
         self.all_sprite = pygame.sprite.Group()
+        self.layer0 = pygame.sprite.Group()
+        self.layer1 = pygame.sprite.Group()
+        self.layer2 = pygame.sprite.Group()
+        self.layer3 = pygame.sprite.Group()
+        self.layer4 = pygame.sprite.Group()
         self.level = open(open_level, "r") #level is text format
+        self.level1 = [char for char in self.level]
         self.crashman = None
     def create_level(self, dx, dy):
         x = dx
         y = dy
-        for char in self.level:
-            self.level1.append(char)
         for row in self.level1:
             for col in row:
                 if col == "C":
                     #obstacle = Obstacle(x, y)
-                    obstacle = Wall.Wall(x,y,[0,0],pygame.image.load('TileSets/Grass/slice27_27.png'))
+                    obstacle = Wall.Wall(x,y,[0,0],pygame.image.load('TileSets/SpaceShip/Floor3.png'))
                     #obstacle = DObject.DObject(x,y,[0,0],[0,0])
                     self.world.append(obstacle)
-                    self.all_sprite.add(obstacle)
+                    self.layer1.add(obstacle)
                 elif col == "X":
                     #obstacle = Obstacle(x, y)
-                    obstacle = Wall.Wall(x,y,[0,0],pygame.image.load('TileSets/Grass/slice03_03.png'))
+                    obstacle = Wall.Wall(x,y,[0,0],pygame.image.load('TileSets/SpaceShip/Floor1.png'))
                     #obstacle = DObject.DObject(x,y,[0,0],[0,0])
                     self.world.append(obstacle)
-                    self.all_sprite.add(obstacle)
+                    self.layer1.add(obstacle)
+                elif col == "(":
+                    #obstacle = Obstacle(x, y)
+                    obstacle = Wall.Wall(x,y,[0,0],pygame.image.load('TileSets/SpaceShip/Floor1Left.png'))
+                    #obstacle = DObject.DObject(x,y,[0,0],[0,0])
+                    self.world.append(obstacle)
+                    self.layer1.add(obstacle)
+                elif col == ")":
+                    #obstacle = Obstacle(x, y)
+                    obstacle = Wall.Wall(x,y,[0,0],pygame.image.load('TileSets/SpaceShip/Floor1Right.png'))
+                    #obstacle = DObject.DObject(x,y,[0,0],[0,0])
+                    self.world.append(obstacle)
+                    self.layer1.add(obstacle)
+                elif col == "-":
+                    #obstacle = Obstacle(x, y)
+                    obstacle = Wall.Wall(x,y,[0,0],pygame.image.load('TileSets/SpaceShip/Floor1Alone.png'))
+                    #obstacle = DObject.DObject(x,y,[0,0],[0,0])
+                    self.world.append(obstacle)
+                    self.layer1.add(obstacle)
+                elif col == "x":
+                    #obstacle = Obstacle(x, y)
+                    obstacle = Wall.Wall(x,y,[0,0],pygame.image.load('TileSets/SpaceShip/Floor2.png'))
+                    #obstacle = DObject.DObject(x,y,[0,0],[0,0])
+                    self.world.append(obstacle)
+                    self.layer1.add(obstacle)
                 elif col == "P":
                     self.crashman = Player.Player(x,y)
                     
                     #self.crashman = Crashman(x,y-3)
-                    self.all_sprite.add(self.crashman)
+                    self.layer2.add(self.crashman)
                     #self.all_sprite.add(self.crashman.spark)
                 elif col == "L":
                     #obstacle = Obstacle(x,y,(-0.5))
-                    obstacle = Wall.Wall(x,y,[1,0], pygame.image.load('TileSets/Grass/slice07_07.png'))
+                    obstacle = Wall.Wall(x,y,[1,0], pygame.image.load('TileSets/SpaceShip/Wall45.png'))
                     self.world.append(obstacle)
-                    self.all_sprite.add(obstacle)
+                    self.layer1.add(obstacle)
                 elif col == "l":
                     #obstacle = Obstacle(x,y,(-0.5))
-                    obstacle = Wall.Wall(x,y,[0,1], pygame.transform.flip(pygame.image.load('TileSets/Grass/slice07_07.png'),True,False))
+                    obstacle = Wall.Wall(x,y,[0,1], pygame.transform.flip(pygame.image.load('TileSets/SpaceShip/Wall45.png'),True,False))
                     self.world.append(obstacle)
-                    self.all_sprite.add(obstacle)
+                    self.layer1.add(obstacle)
                 elif col == "T":
                     #obstacle = Obstacle(x,y,(-0.5))
-                    obstacle = Wall.Wall(x,y,[1,.5], pygame.image.load('TileSets/Grass/tip.png'))
+                    obstacle = Wall.Wall(x,y,[1,.5], pygame.image.load('TileSets/SpaceShip/Wall30_1.png'))
                     self.world.append(obstacle)
-                    self.all_sprite.add(obstacle)
+                    self.layer1.add(obstacle)
                 elif col == "t":
                     #obstacle = Obstacle(x,y,(-0.5))
-                    obstacle = Wall.Wall(x,y,[.5,1], pygame.transform.flip(pygame.image.load('TileSets/Grass/tip.png'),True,False))
+                    obstacle = Wall.Wall(x,y,[.5,1], pygame.transform.flip(pygame.image.load('TileSets/SpaceShip/Wall30_1.png'),True,False))
                     self.world.append(obstacle)
-                    self.all_sprite.add(obstacle)
+                    self.layer1.add(obstacle)
                 elif col == "B":
                     #obstacle = Obstacle(x,y,(-0.5))
-                    obstacle = Wall.Wall(x,y,[.5,0], pygame.image.load('TileSets/Grass/base.png'))
+                    obstacle = Wall.Wall(x,y,[.5,0], pygame.image.load('TileSets/SpaceShip/Wall30_2.png'))
                     self.world.append(obstacle)
-                    self.all_sprite.add(obstacle)
+                    self.layer1.add(obstacle)
                 elif col == "b":
                     #obstacle = Obstacle(x,y,(-0.5))
-                    obstacle = Wall.Wall(x,y,[0,.5], pygame.transform.flip(pygame.image.load('TileSets/Grass/base.png'),True,False))
+                    obstacle = Wall.Wall(x,y,[0,.5], pygame.transform.flip(pygame.image.load('TileSets/SpaceShip/Wall30_2.png'),True,False))
                     self.world.append(obstacle)
-                    self.all_sprite.add(obstacle)
-                elif col == "F":
+                    self.layer1.add(obstacle)
+                elif col == "_":
                     #obstacle= Obstacle(x,y,(-0.5))
-                    obstacle = Wall.Wall(x,y,[1,0], pygame.transform.flip(pygame.image.load('TileSets/Grass/base.png'),True,False))
-                    obstacle.rect.top-=TLHGHT
-                    obstacle.rect.height = TLHGHT*2
-                    self.world.append(obstacle)
-                    self.all_sprite.add(obstacle)
+                    obstacle = Wall.Wall(x,y,[0,0], pygame.image.load('TileSets/SpaceShip/Panel5.png'))
+                    #self.world.append(obstacle)
+                    #self.all_sprite.add(obstacle)
+                    self.layer0.add(obstacle)
+                elif col == "|":
+                    #obstacle= Obstacle(x,y,(-0.5))
+                    obstacle = Wall.Wall(x,y,[0,0], pygame.image.load('TileSets/SpaceShip/Panel4.png'))
+                    #self.world.append(obstacle)
+                    #self.all_sprite.add(obstacle)
+                    self.layer0.add(obstacle)
                     
                 x += TLWDTH #TILEWIDTH
             y += TLHGHT #TILEHEIGHT
             x = dx 
         if self.crashman != None:
             self.crashman.setCollideables(self.world)
-            pass
+        
+    def UseMap(self):
+    	import ImportTile
+    	l = ImportTile.Map('level/','exp.json')
+    	stuff = l.MakeWalls()
+    	for o in stuff:
+    		self.layer1.add(o)
+    		self.world.append(o)
+    		self.all_sprite.add(o)
+    	stuff = l.MakePanels()
+    	for o in stuff:
+    		self.layer0.add(o)
+    		#self.world.append(o)
+    		self.all_sprite.add(o)
+    	self.crashman = Player.Player(200,140)
+    	self.crashman.setCollideables(self.world)
+    	self.all_sprite.add(self.crashman)
+    	self.layer2.add(self.crashman)
+    	self.width = l.MapW * TLWDTH
+    	self.height = l.MapH * TLHGHT
+    	
+    	
     def get_size(self):
         lines = self.level1
         #line = lines[0]
-        line = max(lines, key=len)
-        self.width = (len(line))*TLWDTH #TILEWIDTH
-        self.height = (len(lines))*TLHGHT #TILEHEIGHT
+        #line = max(lines, key=len)
+        #self.width = (len(line))*TLWDTH #TILEWIDTH
+        #self.height = (len(lines))*TLHGHT #TILEHEIGHT
         return (self.width, self.height)
 
 
@@ -334,19 +388,24 @@ def tps(orologio,fps):
 
 
 pygame.init()
-
-screen = pygame.display.set_mode(SCREEN_SIZE, 32)
+levelsongs = glob.glob('Music/*')
+lvlsng = 0
+pygame.mixer.music.load(levelsongs[lvlsng])
+pygame.mixer.music.play(-1)
+screen = pygame.display.set_mode(SCREEN_SIZE, FULLSCREEN | DOUBLEBUF, 32)
+#screen = pygame.display.set_mode(SCREEN_SIZE, 32)
 screen_rect = screen.get_rect()
 #create 5 layers of screens, mimics z axis TODO
 
-background = pygame.image.load("world/background2.jpg").convert()
+background = pygame.image.load("mars.png").convert()
 background_rect = background.get_rect()
 level = Level("level/level3")
-level.create_level(0,0)
+#level.create_level(0,0)
+level.UseMap()
 world = level.world #get the world from the level
 crashman = level.crashman #get the player from the level
 
-pygame.mouse.set_visible(0)
+pygame.mouse.set_visible(True)
 camera = Camera(screen, crashman.collisionrect, level.get_size()[0], level.get_size()[1])
 all_sprite = level.all_sprite #get all sprites from the level
 #DEBUG_SPRITE
@@ -388,6 +447,10 @@ while True:
             elif event.key == K_ESCAPE:
                 pygame.quit()
                 sys.exit()
+            elif event.key == K_p:
+                lvlsng = (lvlsng+1)%len(levelsongs)
+                pygame.mixer.music.load(levelsongs[lvlsng])
+                pygame.mixer.music.play(-1)
         elif event.type == KEYUP:
             if event.key == K_UP:
                 up = 0
@@ -415,7 +478,9 @@ while True:
 
     time_spent = tps(clock, FPS)
     print time_spent
-    camera.draw_sprites(screen, all_sprite)
+    camera.draw_sprites(screen, level.layer0)
+    camera.draw_sprites(screen, level.layer1)
+    camera.draw_sprites(screen, level.layer2)
     #camera should draw sprites based on order of spritegroups.
     #all_sprite should be DrawOrder[i] where objects in DrawOrder[0] are drawn first
     LSX = JS.get_axis(PS3["LSX"])
@@ -438,9 +503,22 @@ while True:
         RSX = 0.0
     if abs(RSY) <.15:
         RSY = 0.0
+    r2 = JS.get_axis(PS3["R2"])
+    l2 = JS.get_axis(PS3["L2"])
+    if r2 <.1:
+    	r2 = 0
+    else:
+   		r2 = 1
+   		
+    if l2 <.1:
+    	l2 = 0
+    else:
+    	l2 = 1
+    #for i in range(JS.get_numaxes()):
+    #	print str(i) + " : : "+str(JS.get_axis(i))
     #crashman.spark.StoreValues(action, [LSX,LSY],[RSX,RSY])
     crashman.spark.FixNRG(QC)
-    crashman.PumpInput({'LSX':LSX,'LSY':LSY,'RSX':RSX,'RSY':RSY,'O':up ,'R1':action})
+    crashman.PumpInput({'LSX':LSX,'LSY':LSY,'RSX':RSX,'RSY':RSY,'O':up ,'R1':action,'R2':r2,'L2':l2})
     crashman.update()
     
     camera.update()

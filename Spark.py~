@@ -1,6 +1,9 @@
 from Constants import *
 from DObject import *
 import math
+
+global TIMEPERBAR
+TIMEPERBAR = 20
 class Spark(pygame.sprite.Sprite):
     def __init__(self, parent):
         pygame.sprite.Sprite.__init__(self)
@@ -10,10 +13,11 @@ class Spark(pygame.sprite.Sprite):
         self.LS = [0,0]
         self.RS = [0,0]
         self.imglst = []
+        self.guilst = []
         self.statelist = [0,1,2]
-        self.energy = FPS*10.0 #takes 10 seconds to load up fully in charge state
-        self.MaxNRG = FPS*10.0
-        self.NRGlvl = 2
+        self.energy = FPS*TIMEPERBAR #takes 10 seconds to load up fully in charge state
+        self.MaxNRG = FPS*TIMEPERBAR # take TIMEPERBAR seconds to recharge a bar. 
+        self.NRGlvl = 0
         self.MaxNRGlvl = 5
         self.imglst.append(MIL2('objects/Cam/lasersparkfire*.png',2)[0])
         self.imglst.append(MIL2('objects/Cam/lasersparkfire*.png',2)[1])
@@ -21,7 +25,11 @@ class Spark(pygame.sprite.Sprite):
         self.imglst.append(MIL2('objects/Cam/lasersparkfire*',2)[1])
         self.imglst.append(MIL2('objects/spark/defsource*',2)[1])
         self.imglst.append(MIL2('objects/spark/defsource*',2)[1])
+        self.guilst.append(pygame.image.load('objects/Bar/cyanblank.png'))
+        self.guilst.append(pygame.image.load('objects/Bar/insectblank.png'))
+        self.guilst.append(pygame.image.load('objects/Bar/optimusblank.png'))
         self.image = pygame.image.load('objects/Cam/lasercamsource.png')
+        self.Gimg = self.guilst[0]
         #self.image = pygame.image.load('randomcyborg.png')
         self.original = self.image
         #for i in range(len(self.imglst)):
@@ -35,12 +43,14 @@ class Spark(pygame.sprite.Sprite):
         print "made spark"
         #~~~~~~~~~~variables can be set by parent later on ~~~ use a save file maybe, or have the level set it
         self.CanPerformADInfinitely = True        
-        
+        self.CurrentAction = "None"
+        self.CAcounter = 0
         
     def changeState(self, newstate):
         newstate = newstate%3
         self.state = newstate
         self.image = self.imglst[self.state*2+self.parent.direction][self.frame%len(self.imglst[self.state*2+self.parent.direction])]
+        self.Gimg = self.guilst[newstate]
         
     def Draw(self,surface,relrect):
         if relrect == None:
@@ -51,24 +61,33 @@ class Spark(pygame.sprite.Sprite):
         #draw gui for debuging TODO
         #draw energy bar
         r = 10+self.NRGlvl*20
-        d = 400.0*self.energy/self.MaxNRG
+        d = self.Gimg.get_width()*self.energy/self.MaxNRG - 10
         if d < 0:
             d = 0
         w = self.NRGlvl*2+2
+        red = (self.state/2+1)*100%255
+        grn = (self.state/1+1)*100%255
+        blu = (self.state/.5+1)*330%255
         pygame.draw.line(surface, (255-d/400*255,0,d/400*250),(100,50),(100+d,50),w)
         pygame.draw.line(surface, (250-d/400*250,r,d/400*250+5),(100,50),(100+d,50),2*w/3)
         pygame.draw.line(surface, (255-d/400*100,r*2,d/400*100+155),(100,50),(100+d,50),w/3)
+        
+        pygame.draw.line(surface, (0,0,0),(100,50),(101+d,50),w+2)
+        pygame.draw.line(surface, (red,grn,blu),(100,50),(100+d,50),w)
+        pygame.draw.line(surface, (red+(255-red)/2,grn+(255-grn)/2,blu+(255-blu)/2),(100,50),(100+d,50),2*w/3)
+        pygame.draw.line(surface, (255-red/5,255-grn/5,255-blu/5),(100,50),(100+d,50),w/3)
         #surface.blit(overlay, (TLWDTH/4,SCRNHGHT - TLHGHT/4 - overlay.get_height()))
         #draw left and right stick inputs
         pygame.draw.line(surface, (255,155,0),(50,50),(40*self.RS[0]+50,40*self.RS[1]+50),3)
         pygame.draw.line(surface, (0,150,255),(50,50),(40*self.LS[0]+50,40*self.LS[1]+50),3)
+        surface.blit(self.Gimg,(90,26,self.Gimg.get_width(),self.Gimg.get_height()))
     
     def FixNRG(self, amount = 0.0):
         self.energy += amount
         if self.state == 0:
             self.energy += 1.0
         elif self.state == 2:
-            self.energy -= .03
+            self.energy -= .5
         if self.energy > self.MaxNRG:
             self.NRGlvl += 1
             dif = self.energy-self.MaxNRG
@@ -105,10 +124,14 @@ class Spark(pygame.sprite.Sprite):
                 #indicates button press while in charge form. Do something to the player
                 angle = 0
                 #if not self.parent.grounded and not self.parent.doublejump and (self.MaxNRG*(self.NRGlvl)+self.energy > FPS*3):
-                if not self.parent.grounded and (self.MaxNRG*(self.NRGlvl)+self.energy > FPS*3):
+                if not self.parent.grounded:
                     #parent in air, push them in the direction indicated by the right stick or left stick
                     #energy must be above 3 seconds' charge time
-                    self.AirDash(FPS*3)
+                    self.AirDash(TIMEPERBAR/2*FPS)
+                    #half a bar consumption
+                elif self.parent.grounded:
+                    self.Dash(TIMEPERBAR/3*FPS)
+                    #one third of a bar consumption
         elif self.state == 1:
             #offensive
             dx = -self.parent.image.get_width()/3-self.image.get_width()/3
@@ -134,14 +157,23 @@ class Spark(pygame.sprite.Sprite):
             self.y = self.parent.y
             self.rect.center = (self.x,self.y)
         #TODO remove the following when update actually deals with inputs
-        if self.frame % 70 == 0:
-            self.changeState(0)
-            print self.state
+        #if self.frame % 70 == 0:
+        #    self.changeState(0)
+            #print self.state
         #self.image = pygame.transform.rotate(self.original,15*math.sin(self.frame/10.0))
         
+    def Dash(self, NRG_used):
+        '''puts player x speed at 2x the run speed'''
+        if self.MaxNRG*(self.NRGlvl)+self.energy < NRG_used:
+            return
+        self.energy -= NRG_used
+        self.parent.ddy = -10
+        self.CurrentAction = "Dash"
+        self.parent.ddx = P_MAXRUNSPEED*cmp(self.parent.ddx,0)
+         
     def AirDash(self, NRG_used):
         '''should be executed when possible. whoever calls this must set energy and NRGlvls.'''
-        if self.parent.doublejump and not self.CanPerformADInfinitely:
+        if self.MaxNRG*(self.NRGlvl)+self.energy < NRG_used or (self.parent.doublejump and not self.CanPerformADInfinitely):
             #if we've used this before in the air and can't do it repeatedly.
             return
         else:
@@ -165,6 +197,8 @@ class Spark(pygame.sprite.Sprite):
             else: #same signs, add on but don't exceed 1.5x P_FALLSPEED
                 self.parent.ddy += y * ratio * P_MAXFALLSPEED
         else:
+            self.parent.ddx = 0
+            self.parent.ddy = 0
             x = self.RS[0]; y = self.RS[1]; hyp = math.sqrt(x*x+y*y)
             ratio = 1/(hyp+.0000001) #would turn the hypotenuse into a unit vector
             if (x/(self.parent.ddx+.00001) < 0)or (self.parent.ddx == 0) : #different signs or 0 speed
