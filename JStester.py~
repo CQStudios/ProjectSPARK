@@ -1,0 +1,18 @@
+import pygame, sys, time
+from pygame.locals import *
+pygame.init()
+pygame.joystick.init()
+joysticks = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]
+for i in joysticks:
+    i.init()
+print joysticks[0].get_name()
+def getin():
+    check = True
+    for e in pygame.event.get():
+        if check and (e.type == pygame.JOYBUTTONDOWN or e.type == pygame.JOYAXISMOTION):
+            print e
+            check = False
+            
+while True:
+    time.sleep(.2)
+    getin()

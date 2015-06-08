@@ -1,0 +1,1 @@
+{"Story": {"Main": [22, "TextSign_980560MaisRoom.json", "NPC_1680525Floor1LivingQuarters.json", "NPC_350245Floor1room5.json"]}, "health": 50.0, "path": "level/", "y": 525, "x": 3640, "spark": {"power": 8, "MaxNRG": 500, "energy": 500, "state": 0, "MaxNRGlvl": 1, "NRGlvl": 1}, "MaxHealth": 50.0, "filename": "Exterior.json"}

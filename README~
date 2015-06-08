@@ -1,0 +1,54 @@
+First you need 3 things. 
+    1.) Python 2.7
+    2.) Pygame
+    3.) a PS3 usb controller
+    
+To install python:
+    for *nix systems, 
+        1.) press ctrl + alt + t
+        2.) copy the content within quotes and paste it into your terminal. "sudo apt-get install python"
+        3.) enter your password when prompted
+    for all other systems:
+        1.) go to https://www.python.org/downloads/release/python-2710/ and download the proper installer for your system.
+        
+to install pygame:
+    for *nix systems:
+        1.) In your terminal, type in "sudo apt-get install python-pygame" and follow the prompts.
+    for all other systems:
+        1.) go to http://pygame.org/download.shtml (no that's not a typo) and get the proper installer
+
+
+
+In order to run:
+    For *nix systems:
+        1.) open terminal, and cd into the ProjectSpark directory. (the one which contains this file)
+        2.) type 'python ProjectSpark.py' press enter, type 'y' at the prompt and press enter again.
+    for all others:
+        1.) in the folder this file was found, open up ProjectSpark.py with the python2.7 interpretter
+        2.) click 'run'
+        
+        
+        
+        
+If you experience any bugs setting up, let me know at Lpquotec@gmail.com
+I'll try to help you out/ fix the bug.
+
+
+
+
+
+credits:
+  Coder:
+    Lucas Phillips
+  Spriters:
+    Joshua Ward
+    Jasmine Abay
+  Dialogue/ Story Boarders:
+    Renna Esmabe
+    Kayla Octaviano
+  Sound Engineer:
+    John (last name missing)
+    
+    
+credit to Astronaut (musician) for any of his music present in the source files.
+credit to the PixelJoint artist(s) whose work remains in the base directory.

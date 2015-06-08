@@ -1,0 +1,191 @@
+#! /usr/bin/env python
+
+import pygame, sys, DObject, Constants, Player, Wall, glob, Spark, math, ImportTile, Camera, Level, OnScreenMenu, time
+
+from pygame.locals import *
+from Constants import *
+from DObject import MIL2
+from Level import *
+def startgame():
+    ans = raw_input(":::::::::Keep in mind these controls:::::::::\nMove with the Left Joystick, Aim certain actions with the Right Joystick.\nR1 is action, L1 and O are Jump\nSwitch modes with L2 and R2, action is useable when the GUI is yellow\nHold down on the Left Stick to interact with things or crouch\n\nAre you ready? (y/n)")
+    if ans in ['n','quit','Quit']:
+        pygame.quit()
+        sys.exit()
+    return ans in ['y','yes','yeah','Y','Yes']
+while startgame() == False:
+    print "enter 'y' or 'quit' next time bruh"
+pygame.init()
+JS = pygame.joystick.Joystick(0)
+if "OUYA" in JS.get_name():
+    PS3 = OUYA
+JS.init()
+G = 5
+SCREEN_SIZE = (SCRNWDTH, SCRNHGHT) #resolution of the game
+global time_spent
+
+def tps(orologio,fps):
+    temp = 0
+    if Constants.FLLSCRN:
+        temp = orologio.tick(fps)
+    else:
+        temp = orologio.tick(fps)
+    tps = temp / 1000.0
+    #print tps
+    return tps
+    
+def setmusic(i):
+    Constants.CUR_LEVEL.setmusic(i)
+    
+pygame.init()
+
+Constants.SCREEN = None
+if Constants.FLLSCRN:
+    ##Constants.SCREEN = pygame.display.set_mode(SCREEN_SIZE,FULLSCREEN,32)
+    Constants.SCREEN = pygame.display.set_mode(SCREEN_SIZE, FULLSCREEN | HWSURFACE,32)
+else:
+    ##Constants.SCREEN = pygame.display.set_mode(SCREEN_SIZE,RESIZABLE, 32)
+    Constants.SCREEN = pygame.display.set_mode(SCREEN_SIZE,32)
+#Constants.SCREEN =  Constants.SCREEN.convert_alpha()
+pausetime = 0
+
+time.sleep(4)
+pygame.mouse.set_visible(False)
+screen_rect = Constants.SCREEN.get_rect()
+
+Constants.CUR_CLOCK = pygame.time.Clock()
+Constants.CUR_LEVEL = Level(None, 'level/','MaisRoom.json')
+Constants.CUR_CAMERA = Camera.Camera(Constants.SCREEN, Constants.CUR_LEVEL.User.collisionrect, (Constants.CUR_LEVEL.get_size()[0], Constants.CUR_LEVEL.get_size()[1]))
+_o=_x=_sq=_tri=_strt=_slct=_l1=_l2=_r1=_r2=_dd=_dr=_dl=_du=0
+x, y = 0, 0
+Constants.frame = 0.0
+m = OnScreenMenu.Menu(150,150,480,480,Constants.CUR_LEVEL)
+Constants.CUR_LEVEL.GUI = m
+Constants.CUR_LEVEL.setvolume(.20)
+Constants.CUR_LEVEL.User.LOAD('Saves/','DEFAULT.json')
+scrimg = pygame.transform.scale(pygame.image.load("SSNASA1.png"),((Constants.SCREEN.get_width(),Constants.SCREEN.get_height())))
+while pausetime < Constants.FPS*3:
+    Constants.SCREEN.blit(scrimg,(0,0,Constants.SCREEN.get_width(),Constants.SCREEN.get_height()))
+    pygame.display.update()
+    time_spent = tps(Constants.CUR_CLOCK, Constants.FPS)
+    pausetime += 1
+    print 'intro'
+while True:
+    Constants.frame += Constants.BGINCREMENT
+    r = Constants.BACKGROUNDIMG.get_rect()
+    if Constants.frame >= r.width:
+        Constants.frame = 0
+    
+    action = 0
+    #_strt = 0
+    for event in pygame.event.get():
+    
+        if event.type == JOYBUTTONDOWN:
+            if event.button == PS3["O"]:
+                _o = 1
+            elif event.button == PS3["L1"]:
+                _l1 = 1
+            elif event.button == PS3["R1"]:
+                _r1 = 1
+            elif event.button == PS3["X"]:
+                _x = 1
+            elif event.button == PS3["Sqr"]:
+                _sq = 1
+            elif event.button == PS3["Tri"]:
+                _tri = 1
+            elif event.button == PS3["Sel"]:
+                _slct = 1
+            elif event.button == PS3["Str"]:
+                _strt = 1
+            elif event.button == PS3["DD"]:
+                _dd = 1
+            elif event.button == PS3["DU"]:
+                _du = 1
+            elif event.button == PS3["DR"]:
+                _dr = 1
+            elif event.button == PS3["DL"]:
+                _dl = 1
+        elif event.type == JOYBUTTONUP:
+            if event.button == PS3["O"]:
+                _o = 0
+            elif event.button == PS3["L1"]:
+                _l1 = 0
+            elif event.button == PS3["R1"]:
+                _r1 = 0
+            elif event.button == PS3["X"]:
+                _x = 0
+            elif event.button == PS3["Sqr"]:
+                _sq = 0
+            elif event.button == PS3["Tri"]:
+                _tri = 0
+            elif event.button == PS3["Sel"]:
+                _slct = 0
+            elif event.button == PS3["Str"]:
+                _strt = 0
+            elif event.button == PS3["DD"]:
+                _dd = 0
+            elif event.button == PS3["DR"]:
+                _dr = 0
+            elif event.button == PS3["DL"]:
+                _dl = 0
+            elif event.button == PS3["DU"]:
+                _du = 0
+        elif event.type == KEYDOWN:
+            if event.key == K_ESCAPE:
+                pygame.quit()
+                sys.exit()
+            elif event.key == K_p:
+                setmusic(1)
+        elif event.type == QUIT:
+            pygame.quit()
+            sys.exit()
+        
+    asize = ((screen_rect.w // r.w + 2) * r.w, (screen_rect.h // r.h + 1) * r.h)
+    bg = pygame.Surface(asize)
+    
+    for x in range(0, asize[0], r.w):
+        for y in range(0, asize[1], r.h):
+            Constants.SCREEN.blit(Constants.BACKGROUNDIMG, (x-Constants.frame, y))
+    Constants.CUR_CAMERA.ThreadJoin()  
+    Constants.CUR_CAMERA.Draw(Constants.SCREEN, Constants.CUR_LEVEL.layers)
+    Constants.CUR_CAMERA.ThreadStart()
+    #camera should draw sprites based on order of spritegroups in our level.
+    #all_sprite should contain all sprites regardless of level.layers' position.
+    #updates should hold all sprite objects which require an update every frame
+    LSX = JS.get_axis(PS3["LSX"])
+    LSY = JS.get_axis(PS3["LSY"])
+    if abs(LSX) <.05:
+        LSX = 0.0
+    
+    if abs(LSY) <.05:
+        LSY = 0.0
+    RSX = JS.get_axis(PS3["RSX"])
+    RSY = JS.get_axis(PS3["RSY"])
+    if abs(RSX) <.05:
+        RSX = 0.0
+    if abs(RSY) <.05:
+        RSY = 0.0
+    _r2 = JS.get_axis(PS3["R2"])
+    _l2 = JS.get_axis(PS3["L2"])
+    if _r2 <.01:
+    	_r2 = 0
+    else:
+   		_r2 = 1
+   		
+    if _l2 <.01:
+    	_l2 = 0
+    else:
+    	_l2 = 1
+
+    Constants.CUR_LEVEL.User.PumpInput({'X':_x,'Tri':_tri,'LSX':LSX,'LSY':LSY,'RSX':RSX,'RSY':RSY,'O':_o,'Sqr':_sq,'R1':_r1,'L1':_l1,'R2':_r2,'L2':_l2,'Str':_strt,'Sel':_slct,'DD':_dd,'DR':_dr,'DL':_dl,'DU':_du})
+    for obj in Constants.CUR_LEVEL.updates:
+        obj.update()
+    if Constants.CUR_LEVEL.User not in Constants.CUR_LEVEL.all_updates and Constants.CUR_LEVEL.User.health <= 0:
+        #GAME OVER, load current save file.
+        Constants.CUR_LEVEL.GameRestart()
+    Constants.CUR_CAMERA.update()
+    #Constants.CUR_CLOCK.tick(Constants.FPS)
+    time_spent = tps(Constants.CUR_CLOCK, Constants.FPS)
+    #print time_spent
+    pygame.display.update()
+    
+    

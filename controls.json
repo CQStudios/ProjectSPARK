@@ -1,0 +1,10 @@
+{
+    "Jump":"O",
+    "Shield":"Sqr",
+    "Shoot":"Tri",
+    "Charge":"X",
+    "Move":"LSX",
+    "Crouch":"LSY",
+    "Act":"R1",
+    "Pause":"Str"
+}
